@@ -1,0 +1,52 @@
+struct Contact {
+string name;
+string phone;
+string email;
+};
+
+int linearSearchByPhone(Contact contacts[], int n, const string &targetPhone) {
+for (int i = 0; i < n; i++) {
+if (contacts[i].phone == targetPhone) {
+return i; // finding the contact number
+}
+}
+return -1;
+}
+
+int main() {
+int n;
+cout << "Enter number of contacts: ";
+cin >> n;
+cin.ignore();
+
+Contact contacts[100]; // assuming maximum 100 contacts; adjust as needed
+
+// Input contacts
+for (int i = 0; i < n; i++) {
+cout << "Contacts " << (i+1) << ":\n";
+
+cout << " Phone.number: ";
+getline(cin, contacts[i].phone);
+cout << " Name of contact: ";
+getline(cin, contacts[i].name);
+cout << " Emailadress: ";
+getline(cin, contacts[i].email);
+cout << "\n";
+}
+
+string phoneToFind;
+cout << "Enter phone number : ";
+getline(cin, phoneToFind);
+
+int details = linearSearchByPhone(contacts, n, phoneToFind);
+if (details != -1) {
+cout << "\nContact found:\n";
+cout << " Name: " << contacts[details].name << "\n";
+cout << " Phone: " << contacts[details].phone << "\n";
+cout << " Email: " << contacts[details].email << "\n";
+} else {
+cout << "\nContact phone number not found.\n";
+}
+
+return 0;
+}
