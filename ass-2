@@ -1,0 +1,49 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+// Function to perform bubble sort
+void bubbleSort(vector<float>& arr) {
+int n = arr.size();
+bool swapped;
+for (int i = 0; i < n - 1; ++i) {
+swapped = false;
+for (int j = 0; j < n - i - 1; ++j) {
+if (arr[j] > arr[j + 1]) {
+swap(arr[j], arr[j + 1]);
+swapped = true;
+}
+}
+
+if (!swapped)
+break;
+}
+}
+
+int main() {
+int n;
+
+// Input number of temperatures
+cout << "Enter the number of temperatures : ";
+
+cin >> n;
+
+vector<float> temperatures(n);
+
+// Input temperatures
+cout << "Enter the temperatures in celcius:\n";
+for (int i = 0; i < n; ++i) {
+cout << "Temperature " << i + 1 << ": ";
+cin >> temperatures[i];
+}
+
+bubbleSort(temperatures);
+
+cout << "\nSort the temperatures in ascending order:\n";
+for (int i = 0; i < n; ++i) {
+cout << "Temperature " << i + 1 << ": " << temperatures[i] << "°C\n";
+}
+
+return 0;
+}
