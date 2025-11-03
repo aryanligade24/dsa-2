@@ -1,0 +1,241 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+struct Contact {
+int id;
+string name;
+string phone;
+string email;
+};
+
+struct AVLNode {
+Contact contact;
+AVLNode *left;
+
+AVLNode *right;
+int height;
+AVLNode(const Contact &c)
+: contact(c), left(nullptr), right(nullptr), height(1) {}
+};
+
+int height(AVLNode *node) {
+return node ? node->height : 0;
+}
+
+int getBalance(AVLNode *node) {
+if (!node) return 0;
+return height(node->left) - height(node->right);
+}
+
+void updateHeight(AVLNode *node) {
+if (node) {
+node->height = 1 + max(height(node->left), height(node->right));
+}
+}
+
+// Right rotate subtree rooted with y
+AVLNode* rightRotate(AVLNode *y) {
+AVLNode *x = y->left;
+AVLNode *T2 = x->right;
+
+// Perform rotation
+x->right = y;
+y->left = T2;
+
+// Update heights
+
+updateHeight(y);
+updateHeight(x);
+
+// New root
+return x;
+}
+
+// Left rotate subtree rooted with x
+AVLNode* leftRotate(AVLNode *x) {
+AVLNode *y = x->right;
+AVLNode *T2 = y->left;
+
+// Perform rotation
+y->left = x;
+x->right = T2;
+
+// Update heights
+updateHeight(x);
+updateHeight(y);
+
+// New root
+return y;
+}
+
+// Insert a contact into the AVL tree keyed by name
+AVLNode* insertContact(AVLNode *node, const Contact &c) {
+if (!node)
+return new AVLNode(c);
+
+// BST insert based on name
+if (c.name < node->contact.name) {
+
+node->left = insertContact(node->left, c);
+} else if (c.name > node->contact.name) {
+node->right = insertContact(node->right, c);
+} else {
+// Duplicate name — you could decide to update instead or reject
+// For now, we reject insertion with the same name
+cout << "Contact with name \"" << c.name << "\" already exists." << endl;
+return node;
+}
+
+// Update height of this ancestor node
+updateHeight(node);
+
+// Get balance factor to check whether this node became unbalanced
+int balance = getBalance(node);
+
+// Four cases:
+
+// Left Left Case
+if (balance > 1 && c.name < node->left->contact.name) {
+return rightRotate(node);
+}
+
+// Right Right Case
+if (balance < -1 && c.name > node->right->contact.name) {
+return leftRotate(node);
+}
+
+// Left Right Case
+if (balance > 1 && c.name > node->left->contact.name) {
+node->left = leftRotate(node->left);
+
+return rightRotate(node);
+}
+
+// Right Left Case
+if (balance < -1 && c.name < node->right->contact.name) {
+node->right = rightRotate(node->right);
+return leftRotate(node);
+}
+
+// Node is balanced
+return node;
+}
+
+// Utility to search by name
+AVLNode* searchByName(AVLNode *node, const string &name) {
+if (!node) return nullptr;
+if (name == node->contact.name) {
+return node;
+} else if (name < node->contact.name) {
+return searchByName(node->left, name);
+} else {
+return searchByName(node->right, name);
+}
+}
+
+// Utility to search by phone number (inorder traversal)
+AVLNode* searchByPhone(AVLNode *node, const string &phone) {
+if (!node) return nullptr;
+if (node->contact.phone == phone) {
+return node;
+}
+
+AVLNode *leftRes = searchByPhone(node->left, phone);
+if (leftRes) return leftRes;
+return searchByPhone(node->right, phone);
+}
+
+// Utility to search by email
+AVLNode* searchByEmail(AVLNode *node, const string &email) {
+if (!node) return nullptr;
+if (node->contact.email == email) {
+return node;
+}
+AVLNode *leftRes = searchByEmail(node->left, email);
+if (leftRes) return leftRes;
+return searchByEmail(node->right, email);
+}
+
+// Update contact given a name (you could also search by phone/email first)
+bool updateContactByName(AVLNode *root, const string &name,
+const string &newPhone,
+const string &newEmail) {
+AVLNode *n = searchByName(root, name);
+if (!n) {
+return false;
+}
+n->contact.phone = newPhone;
+n->contact.email = newEmail;
+return true;
+}
+
+// Inorder traversal to display contacts
+void inorderPrint(AVLNode *root) {
+
+if (!root) return;
+inorderPrint(root->left);
+cout << "ID: " << root->contact.id
+<< " | Name: " << root->contact.name
+<< " | Phone: " << root->contact.phone
+<< " | Email: " << root->contact.email
+<< " | Height: " << root->height
+<< endl;
+inorderPrint(root->right);
+}
+
+int main() {
+AVLNode *root = nullptr;
+
+// Initial contacts
+Contact c1 {101, "Rahul Sharma", "9876543210", "rahul@example.com"};
+Contact c2 {102, "Priya Patel", "1234567890", "priya@example.com"};
+Contact c3 {103, "Aarav Gupta", "8765432109", "aarav@example.com"};
+
+root = insertContact(root, c1);
+root = insertContact(root, c2);
+root = insertContact(root, c3);
+
+cout << "Contacts in-order (sorted by name):" << endl;
+inorderPrint(root);
+cout << "----" << endl;
+
+// Search by name
+string queryName = "Priya Patel";
+AVLNode *found = searchByName(root, queryName);
+if (found) {
+
+cout << "Found contact by name \"" << queryName << "\": ID = "
+<< found->contact.id << ", phone = "
+<< found->contact.phone << ", email = "
+<< found->contact.email << endl;
+} else {
+cout << "Contact by name \"" << queryName << "\" not found." << endl;
+}
+
+// Search by phone
+string queryPhone = "8765432109";
+found = searchByPhone(root, queryPhone);
+if (found) {
+cout << "Found contact by phone \"" << queryPhone << "\": name = "
+<< found->contact.name << ", ID = "
+<< found->contact.id << endl;
+} else {
+cout << "Contact by phone \"" << queryPhone << "\" not found." << endl;
+}
+
+// Update contact
+cout << "Updating Priya Patel's phone & email." << endl;
+bool updated = updateContactByName(root, "Priya Patel",
+"9998887776", "priya_new@example.com");
+if (updated) {
+cout << "After update:" << endl;
+inorderPrint(root);
+} else {
+cout << "Update failed: contact not found." << endl;
+}
+
+return 0;
+
+}
