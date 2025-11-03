@@ -1,0 +1,167 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Patient {
+string name;
+int age;
+string condition;
+Patient* next;
+};
+
+class ERQueue {
+Patient* front;
+Patient* rear;
+
+public:
+ERQueue() : front(nullptr), rear(nullptr) {}
+
+void addPatient(const string& name, int age, const string& condition) {
+Patient* newPatient = new Patient{name, age, condition, nullptr};
+if (!rear) front = rear = newPatient;
+else {
+rear->next = newPatient;
+rear = newPatient;
+}
+cout << "Patient added: " << name << "\n";
+}
+
+void examinePatient() {
+if (!front) {
+cout << "No patients.\n";
+return;
+}
+
+Patient* temp = front;
+cout << "Examining: " << temp->name << ", " << temp->age << " years, Condition: " << temp->condition << "\n";
+front = front->next;
+if (!front) rear = nullptr;
+delete temp;
+}
+
+void prioritizePatient(const string& name) {
+if (!front || !front->next) {
+cout << "Not enough patients to prioritize.\n";
+return;
+}
+if (front->name == name) {
+cout << "Already highest priority.\n";
+return;
+}
+Patient *prev = nullptr, *curr = front;
+while (curr && curr->name != name) {
+prev = curr;
+curr = curr->next;
+}
+if (!curr) {
+cout << "Patient not found.\n";
+return;
+}
+
+if (prev == front) {
+Patient* second = front->next;
+front->next = second->next;
+second->next = front;
+front = second;
+if (front->next->next == nullptr) rear = front->next;
+} else {
+Patient* beforePrev = front;
+while (beforePrev->next != prev) beforePrev = beforePrev->next;
+
+prev->next = curr->next;
+curr->next = prev;
+beforePrev->next = curr;
+if (prev->next == nullptr) rear = prev;
+}
+cout << "Patient " << name << " moved up in priority.\n";
+}
+
+void display() {
+if (!front) {
+cout << "No patients in queue.\n";
+return;
+}
+cout << "Patient Queue:\n";
+Patient* curr = front;
+int pos = 1;
+while (curr) {
+cout << pos++ << ". " << curr->name << ", " << curr->age << " years, Condition: " << curr->condition << "\n";
+curr = curr->next;
+}
+}
+
+Patient* search(const string& name) {
+Patient* curr = front;
+while (curr) {
+if (curr->name == name) return curr;
+curr = curr->next;
+}
+return nullptr;
+}
+
+void update(const string& name) {
+Patient* p = search(name);
+if (!p) {
+cout << "Patient not been found.\n";
+
+return;
+}
+cout << "Update the age for " << p->name << ": ";
+cin >> p->age;
+cin.ignore();
+cout << "Update condition: ";
+getline(cin, p->condition);
+cout << "Information updated.\n";
+}
+
+~ERQueue() {
+while (front) {
+Patient* temp = front;
+front = front->next;
+delete temp;
+}
+}
+};
+
+int main() {
+ERQueue queue;
+int choice;
+do {
+cout << "\n1. Add Patient\n2. Examine Patient\n3. Prioritize Patient\n4. Display Queue\n5. Search Patient\n6.Update Patient\n0. Exit\nChoice: ";
+cin >> choice;
+cin.ignore();
+
+if (choice == 1) {
+string name, condition;
+int age;
+cout << "Name of the patient: "; getline(cin, name);
+cout << "Age of patient: "; cin >> age; cin.ignore();
+cout << "Condition: "; getline(cin, condition);
+queue.addPatient(name, age, condition);
+
+} else if (choice == 2) {
+queue.examinePatient();
+} else if (choice == 3) {
+string name;
+cout << "Name to prioritize: "; getline(cin, name);
+queue.prioritizePatient(name);
+} else if (choice == 4) {
+queue.display();
+} else if (choice == 5) {
+string name;
+cout << "Search name: "; getline(cin, name);
+Patient* p = queue.search(name);
+if (p) cout << "Found: " << p->name << ", Age " << p->age << ", Condition: " << p->condition << "\n";
+else cout << "Not found.\n";
+} else if (choice == 6) {
+string name;
+cout << "Update patient name: "; getline(cin, name);
+queue.update(name);
+} else if (choice != 0) {
+cout << "Invalid choice.\n";
+}
+} while(choice != 0);
+
+cout << "Exiting program.\n";
+return 0;
+}
