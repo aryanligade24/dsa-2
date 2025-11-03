@@ -1,0 +1,214 @@
+#include <iostream>
+#include <stdio.h>
+#include <string.h>
+using namespace std;
+
+int count = 100;
+
+class Product
+{
+public:
+int id;
+char username[20];
+int quantity;
+int price;
+string category;
+
+Product *next;
+Product *nextSimilar;
+
+Product ()
+{
+next = NULL;
+nextSimilar = NULL;
+}
+};
+
+class Inventory
+{
+public:
+Product *head;
+Product *headPhone;
+Product *headLaptop;
+Product *headOther;
+Product *curr;
+Inventory()
+{
+head = NULL;
+headPhone = NULL;
+headLaptop = NULL;
+headOther = NULL;
+curr = NULL;
+}
+
+void addProduct()
+{
+Product *newProduct = new Product();
+count++;
+newProduct->id = count;
+
+cout << "Enter Product Name: ";
+cin >> newProduct->username;
+cout << "Enter Product Quantity: ";
+cin >> newProduct->quantity;
+cout << "Enter Product Price (in USD): ";
+cin >> newProduct->price;
+cout << "Enter Product category: ";
+cin.ignore();
+getline(cin, newProduct->category);
+
+if (head == NULL)
+{
+head = newProduct;
+}
+else
+{
+Product *p;
+for (p = head; p->next != NULL; p = p->next)
+{}
+p->next = newProduct;
+}
+
+// add to category-specific list
+if (newProduct->category == "Phone")
+{
+if (headPhone == NULL) headPhone = newProduct;
+else
+{
+Product *p;
+for (p = headPhone; p->nextSimilar != NULL; p = p->nextSimilar) {}
+p->nextSimilar = newProduct;
+
+}
+}
+else if (newProduct->category == "Laptop")
+{
+if (headLaptop == NULL) headLaptop = newProduct;
+else
+{
+Product *p;
+for (p = headLaptop; p->nextSimilar != NULL; p = p->nextSimilar) {}
+p->nextSimilar = newProduct;
+}
+}
+else // treat as "Other"
+{
+if (headOther == NULL) headOther = newProduct;
+else
+{
+Product *p;
+for (p = headOther; p->nextSimilar != NULL; p = p->nextSimilar) {}
+p->nextSimilar = newProduct;
+}
+}
+}
+
+void updateProductAttributes()
+{
+int idmatch;
+cout<<"Enter Product ID to update: ";
+cin>>idmatch;
+
+for(curr=head; curr!=NULL; curr=curr->next)
+
+{
+if (curr->id == idmatch)
+{
+cout<<"Enter Product Name: ";
+cin>>curr->username;
+cout<<"Enter Product Quantity: ";
+cin>>curr->quantity;
+cout<<"Enter Product Price (in USD): ";
+cin>>curr->price;
+cout<<"Enter Product Category: ";
+cin>>curr->category;
+break;
+}
+}
+}
+
+void printInventory()
+{
+cout<<"ID"<<"\t"<<"Product Name"<<"\t"<<"Quantity"<<"\t"<<"Price($)"<<"\t"<<"Category";
+for(curr=head; curr!=NULL; curr=curr->next)
+{
+cout<<"\n"<<curr->id<<"\t"<<curr->username<<"\t"<<curr->quantity<<"\t"<<curr->price<<"\t"<<curr->category<<"\t";
+}
+}
+
+void printInventoryValue()
+{
+float totalvalue = 0;
+for(curr=head; curr!=NULL; curr=curr->next)
+{
+
+totalvalue = totalvalue + (curr->price * curr->quantity);
+}
+cout << "Total Value of Inventory is($): " << totalvalue;
+}
+
+void printCategoryListPhone()
+{
+cout<<"ID"<<"\t"<<"Product Name"<<"\t"<<"Quantity"<<"\t"<<"Price($)";
+for(curr=headPhone; curr!=NULL; curr=curr->nextSimilar)
+{
+cout<<"\n"<<curr->id<<"\t"<<curr->username<<"\t"<<curr->quantity<<"\t"<<curr->price<<"\t";
+}
+}
+
+void printCategoryListLaptop()
+{
+cout<<"ID"<<"\t"<<"Product Name"<<"\t"<<"Quantity"<<"\t"<<"Price($)";
+for(curr=headLaptop; curr!=NULL; curr=curr->nextSimilar)
+{
+cout<<"\n"<<curr->id<<"\t"<<curr->username<<"\t"<<curr->quantity<<"\t"<<curr->price<<"\t";
+}
+}
+
+void printCategoryListOther()
+{
+cout<<"ID"<<"\t"<<"Product Name"<<"\t"<<"Quantity"<<"\t"<<"Price($)";
+for(curr=headOther; curr!=NULL; curr=curr->nextSimilar)
+{
+cout<<"\n"<<curr->id<<"\t"<<curr->username<<"\t"<<curr->quantity<<"\t"<<curr->price<<"\t";
+}
+}
+
+};
+
+int main()
+{
+
+int ch;
+class Inventory *h = new Inventory();
+do
+{
+cout<<"\n\t*** INVENTORY ***\n";
+cout<<"\n1) Add Product";
+cout<<"\n2) Update Product Attributes";
+cout<<"\n3) Print Inventory";
+cout<<"\n4) Print Total value of Inventory";
+cout<<"\n5) Print 'Phone' List";
+cout<<"\n6) Print 'Laptop' List";
+cout<<"\n7) Print 'Other List";
+cout<<"\n8) Exit\n";
+cout<<"\nEnter your choice: \n";
+cin>>ch;
+
+switch(ch)
+{
+case 1: h->addProduct(); break;
+case 2: h->updateProductAttributes(); break;
+case 3: h->printInventory(); break;
+case 4: h->printInventoryValue(); break;
+case 5: h->printCategoryListPhone(); break;
+case 6: h->printCategoryListLaptop(); break;
+case 7: h->printCategoryListOther(); break;
+case 8: exit(0); break;
+
+default: cout<<"Invalid Choice"; break;
+}
+} while(ch!=8);
+
+return 0;
+}
