@@ -1,0 +1,155 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <limits> // <--- for numeric_limits
+using namespace std;
+
+struct Student {
+int id;
+string name;
+int age;
+string branch;
+
+Student(int _id = 0, string _name = "", int _age = 0, string _branch = "")
+: id(_id), name(_name), age(_age), branch(_branch) {}
+};
+
+class StudentHash {
+private:
+static const int TABLE_SIZE = 10;
+vector<vector<Student>> table;
+
+int hashFunction(int studentID) {
+return studentID % TABLE_SIZE;
+}
+
+public:
+StudentHash() {
+table.resize(TABLE_SIZE);
+}
+
+bool addStudent(const Student &s) {
+int idx = hashFunction(s.id);
+// Check duplicate
+for (auto &st : table[idx]) {
+if (st.id == s.id) {
+cout << "Error: Student ID " << s.id << " already exists.\n";
+return false;
+}
+}
+table[idx].push_back(s);
+cout << "Student added with ID " << s.id << ".\n";
+return true;
+}
+
+bool removeStudent(int studentID) {
+int idx = hashFunction(studentID);
+auto &bucket = table[idx];
+for (auto it = bucket.begin(); it != bucket.end(); ++it) {
+if (it->id == studentID) {
+bucket.erase(it);
+cout << "Student with ID " << studentID << " removed.\n";
+
+return true;
+}
+}
+cout << "Student ID " << studentID << " not found.\n";
+return false;
+}
+
+Student *getStudent(int studentID) {
+int idx = hashFunction(studentID);
+for (auto &st : table[idx]) {
+if (st.id == studentID) {
+return &st;
+}
+}
+return nullptr;
+}
+
+void displayAll() {
+cout << "All student records:\n";
+for (int i = 0; i < TABLE_SIZE; i++) {
+cout << "Bucket " << i << ":\n";
+for (auto &st : table[i]) {
+cout << " ID: " << st.id
+<< ", Name: " << st.name
+<< ", Age: " << st.age
+<< ", Branch: " << st.branch
+<< "\n";
+}
+}
+}
+};
+
+int main() {
+StudentHash db;
+int choice;
+
+do {
+cout << "\n--- Student Record System ---\n";
+cout << "1. Add Student\n";
+cout << "2. Remove Student\n";
+cout << "3. Search Student by ID\n";
+cout << "4. Display All Students\n";
+cout << "5. Exit\n";
+cout << "Enter your choice: ";
+cin >> choice;
+
+switch(choice) {
+case 1: {
+Student s;
+cout << "Enter ID: ";
+cin >> s.id;
+cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+cout << "Enter Name: ";
+getline(cin, s.name);
+
+cout << "Enter Age: ";
+cin >> s.age;
+cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+cout << "Enter Branch: ";
+getline(cin, s.branch);
+
+db.addStudent(s);
+break;
+}
+case 2: {
+int id;
+cout << "Enter ID to remove: ";
+cin >> id;
+db.removeStudent(id);
+break;
+}
+case 3: {
+int id;
+cout << "Enter ID to search: ";
+cin >> id;
+Student *res = db.getStudent(id);
+if (res) {
+cout << "Found: ID=" << res->id
+<< ", Name=" << res->name
+<< ", Age=" << res->age
+<< ", Branch=" << res->branch << "\n";
+} else {
+cout << "Student ID " << id << " not found.\n";
+}
+break;
+}
+case 4:
+db.displayAll();
+break;
+case 5:
+cout << "Exiting.\n";
+
+break;
+default:
+cout << "Invalid choice.\n";
+}
+
+} while (choice != 5);
+
+return 0;
+}
