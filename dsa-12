@@ -1,0 +1,109 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct Edge {
+int u, v;
+double cost;
+};
+
+struct DisjointSet {
+int n;
+vector<int> parent, rankv;
+DisjointSet(int n_) : n(n_), parent(n_), rankv(n_, 0) {
+for (int i = 0; i < n_; i++) parent[i] = i;
+}
+void make_set(int x) { parent[x] = x; rankv[x] = 0; }
+int find_set(int x) {
+if (parent[x] != x)
+parent[x] = find_set(parent[x]);
+return parent[x];
+}
+void union_set(int a, int b) {
+a = find_set(a);
+b = find_set(b);
+if (a != b) {
+if (rankv[a] < rankv[b])
+
+parent[a] = b;
+else if (rankv[b] < rankv[a])
+parent[b] = a;
+else {
+parent[b] = a;
+rankv[a]++;
+}
+}
+}
+};
+
+bool cmpEdge(const Edge &a, const Edge &b) {
+return a.cost < b.cost;
+}
+
+int main() {
+int V; // number of houses (vertices)
+cout << "Enter number of houses (vertices): ";
+cin >> V;
+
+int E;
+cout << "Enter number of possible connections (edges): ";
+cin >> E;
+
+vector<Edge> edges;
+edges.reserve(E);
+
+cout << "Enter edges: (u v cost) — u,v are house indices 0..V-1\n";
+for (int i = 0; i < E; i++) {
+Edge e;
+cin >> e.u >> e.v >> e.cost;
+
+if (e.u < 0 || e.u >= V || e.v < 0 || e.v >= V) {
+cout << "Invalid vertices, skipping.\n";
+i--; // ask again (optional)
+continue;
+}
+edges.push_back(e);
+}
+
+// sort edges by cost
+sort(edges.begin(), edges.end(), cmpEdge);
+
+DisjointSet ds(V);
+double totalCost = 0.0;
+vector<Edge> mstEdges;
+
+for (auto &e : edges) {
+if (ds.find_set(e.u) != ds.find_set(e.v)) {
+ds.union_set(e.u, e.v);
+mstEdges.push_back(e);
+totalCost += e.cost;
+}
+}
+
+// Check if we actually connected all houses
+// All vertices must belong to same set
+int root0 = ds.find_set(0);
+bool connected = true;
+for (int i = 1; i < V; i++) {
+if (ds.find_set(i) != root0) {
+connected = false;
+break;
+
+}
+}
+
+if (!connected) {
+cout << "Warning: Not all houses are connected with the given edges.\n";
+}
+
+cout << "\nChosen pipeline routes in MST:\n";
+for (auto &e : mstEdges) {
+cout << " House " << e.u << " — House " << e.v
+<< " costing " << e.cost << "\n";
+}
+
+cout << "Total minimum cost = " << totalCost << "\n";
+
+return 0;
+}
