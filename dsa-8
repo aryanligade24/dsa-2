@@ -1,0 +1,135 @@
+#include <iostream>
+using namespace std;
+#define size 5
+
+class PCCOEcafe
+{
+int orderId;
+static int cust_count;
+string customerName;
+string orderItems;
+
+public:
+void readOrder()
+{
+orderId = ++cust_count;
+cout<<"Enter Name: ";
+cin>>customerName;
+cout<<"Enter Ordered Items: ";
+cin>>orderItems;
+}
+void printOrder()
+{
+cout<<"Order ID: "<<orderId<<endl;
+cout<<"Items: "<<orderItems<<endl;
+cout<<"Customer Name: "<<customerName<<endl;
+
+}
+};
+
+int PCCOEcafe::cust_count = 0;
+
+class CircularQueue
+{
+public:
+int front, rear;
+int count;
+PCCOEcafe q[5];
+
+CircularQueue()
+{
+count = 0;
+front = -1;
+rear = -1;
+}
+
+void enqueue(PCCOEcafe x)
+{
+if (count == size)
+{
+cout<<"PCCOE Cafe Queue Full"<<endl;
+}
+else
+{
+rear = (rear + 1) % size;
+q[rear] = x;
+count++;
+}
+}
+
+PCCOEcafe dequeue()
+
+{
+PCCOEcafe x;
+if (count > 0)
+{
+front = (front + 1) % size;
+x = q[front];
+
+count--;
+return x;
+}
+else
+{
+cout<<"PCCOE Cafe Queue Empty"<<endl;
+return x;
+}
+}
+void printQueue()
+{
+int i;
+if(count>0)
+{
+cout<<"\n--- PCCOE Cafe Circular Queue Elements ---\n";
+
+for (i=((front+1)%size); i!=rear;(i=(i+1)%size))
+{
+q[i].printOrder();
+cout<<endl;
+}
+q[i].printOrder();
+cout<<" ";
+}
+else
+{
+cout<<"\nQueue is Empty";
+
+}
+}
+};
+
+int main(int argc, char** argv)
+{
+PCCOEcafe Customer;
+CircularQueue q1;
+int ch;
+do
+{
+cout<<"\n*** Welcome to PCCOE Cafe ***\n";
+cout<<"\nImplemented by: PRN - 124B1F059; Name - Ved\n";
+cout<<"\n 1. Place Order";
+cout<<"\n 2. Process Order";
+cout<<"\n 3. Print Queue";
+cout<<"\n 4. Exit";
+cout<<"\n Enter your choice: ";
+cin>>ch;
+switch(ch)
+{
+case 1:
+Customer.readOrder();
+q1.enqueue(Customer);
+break;
+
+case 2:
+Customer = q1.dequeue();
+cout<<"\nProcessed Order Details\n";
+Customer.printOrder();
+break;
+
+case 3:
+q1.printQueue();
+
+}
+} while (ch!=4);
+return 0;
+}
