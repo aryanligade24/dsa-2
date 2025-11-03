@@ -1,0 +1,227 @@
+#include <iostream>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode *l, *r;
+    TreeNode(int v) { val = v; l = r = NULL; }
+};
+
+class Tree {
+public:
+    TreeNode* root;
+    Tree() { root = NULL; }
+
+    void addNode(int v) {
+        TreeNode* n = new TreeNode(v);
+        if (!root) {
+            root = n;
+            cout << "Root node " << v << " inserted.\n";
+            return;
+        }
+        TreeNode *p = NULL, *c = root;
+        while (c) {
+            p = c;
+            if (v == c->val) {
+                cout << "Duplicate entry detected, skipping " << v << ".\n";
+                return;
+            } else if (v < c->val)
+                c = c->l;
+            else
+                c = c->r;
+        }
+        if (v < p->val) p->l = n;
+        else p->r = n;
+        cout << "Added new node with value: " << v << endl;
+    }
+
+    TreeNode* deleteNode(TreeNode* r, int v) {
+        if (!r) return r;
+        if (v < r->val)
+            r->l = deleteNode(r->l, v);
+        else if (v > r->val)
+            r->r = deleteNode(r->r, v);
+        else {
+            if (!r->l) return r->r;
+            else if (!r->r) return r->l;
+            r->val = findMin(r->r);
+            r->r = deleteNode(r->r, r->val);
+        }
+        return r;
+    }
+
+    int findMin(TreeNode* r) {
+        while (r->l) r = r->l;
+        return r->val;
+    }
+
+    bool search(int v) {
+        TreeNode* c = root;
+        while (c) {
+            if (c->val == v) return true;
+            else if (v < c->val) c = c->l;
+            else c = c->r;
+        }
+        return false;
+    }
+
+    void inorder(TreeNode* r) {
+        if (!r) return;
+        inorder(r->l);
+        cout << r->val << " ";
+        inorder(r->r);
+    }
+
+    void preorder(TreeNode* r) {
+        if (!r) return;
+        cout << r->val << " ";
+        preorder(r->l);
+        preorder(r->r);
+    }
+
+    void postorder(TreeNode* r) {
+        if (!r) return;
+        postorder(r->l);
+        postorder(r->r);
+        cout << r->val << " ";
+    }
+
+    int getDepth(TreeNode* r) {
+        if (!r) return 0;
+        int a = getDepth(r->l);
+        int b = getDepth(r->r);
+        return (a > b ? a : b) + 1;
+    }
+
+    TreeNode* mirror(TreeNode* r) {
+        if (!r) return NULL;
+        TreeNode* temp = r->l;
+        r->l = mirror(r->r);
+        r->r = mirror(temp);
+        return r;
+    }
+
+    TreeNode* clone(TreeNode* r) {
+        if (!r) return NULL;
+        TreeNode* n = new TreeNode(r->val);
+        n->l = clone(r->l);
+        n->r = clone(r->r);
+        return n;
+    }
+
+    void showRelations(TreeNode* r) {
+        if (!r) return;
+        if (r->l) cout << "Parent " << r->val << " has left child " << r->l->val << endl;
+        if (r->r) cout << "Parent " << r->val << " has right child " << r->r->val << endl;
+        showRelations(r->l);
+        showRelations(r->r);
+    }
+
+    void showLeaves(TreeNode* r) {
+        if (!r) return;
+        if (!r->l && !r->r) cout << r->val << " ";
+        showLeaves(r->l);
+        showLeaves(r->r);
+    }
+
+    void levelDisplay() {
+        if (!root) return;
+        TreeNode* q[100];
+        int f = 0, r = 0;
+        q[r++] = root;
+        while (f < r) {
+            TreeNode* n = q[f++];
+            cout << n->val << " ";
+            if (n->l) q[r++] = n->l;
+            if (n->r) q[r++] = n->r;
+        }
+    }
+};
+
+int main() {
+    Tree t;
+    int ch, v;
+    do {
+        cout << "\n=== Binary Search Tree Operations Menu ===\n";
+        cout << "1) Insert (Handle duplicate entry)\n";
+        cout << "2) Delete\n";
+        cout << "3) Search\n";
+        cout << "4) Display tree (Traversals)\n";
+        cout << "5) Display Depth of tree\n";
+        cout << "6) Display Mirror image\n";
+        cout << "7) Create a copy\n";
+        cout << "8) Display all parent nodes with their child nodes\n";
+        cout << "9) Display leaf nodes\n";
+        cout << "10) Display tree level wise\n";
+        cout << "0) Exit\n";
+        cout << "Enter your choice: ";
+        cin >> ch;
+
+        switch (ch) {
+            case 1:
+                cout << "Enter value to insert: ";
+                cin >> v;
+                t.addNode(v);
+                break;
+
+            case 2:
+                cout << "Enter value to delete: ";
+                cin >> v;
+                t.root = t.deleteNode(t.root, v);
+                cout << "Deleted " << v << ".\n";
+                break;
+
+            case 3:
+                cout << "Enter value to search: ";
+                cin >> v;
+                cout << (t.search(v) ? "Item found in BST.\n" : "Item not present in BST.\n");
+                break;
+
+            case 4:
+                cout << "Inorder: ";
+                t.inorder(t.root);
+                cout << "\nPreorder: ";
+                t.preorder(t.root);
+                cout << "\nPostorder: ";
+                t.postorder(t.root);
+                cout << endl;
+                break;
+
+            case 5:
+                cout << "Height of current tree: " << t.getDepth(t.root) << endl;
+                break;
+
+            case 6:
+                t.root = t.mirror(t.root);
+                cout << "Mirror image created.\n";
+                break;
+
+            case 7: {
+                TreeNode* copy = t.clone(t.root);
+                cout << "Inorder traversal of copied tree: ";
+                t.inorder(copy);
+                cout << endl;
+                break;
+            }
+
+            case 8:
+                cout << "Displaying parent-child relationships:\n";
+                t.showRelations(t.root);
+                break;
+
+            case 9:
+                cout << "Leaf nodes in the tree: ";
+                t.showLeaves(t.root);
+                cout << endl;
+                break;
+
+            case 10:
+                cout << "Tree displayed level by level:\n";
+                t.levelDisplay();
+                cout << endl;
+                break;
+        }
+    } while (ch != 0);
+
+    return 0;
+}
